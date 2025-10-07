@@ -1,0 +1,22 @@
+{
+  "profile": {
+    "name": "IDOWU MAYOWA JOSHUA",
+    "roles": ["SOFTWARE ENGINEER","BACKEND DEVELOPER","FRONTEND DEVELOPER"],
+    "avatar": "/avatar.png"
+  },
+  "about": "Hi — I'm IDOWU MAYOWA JOSHUA. ...",
+  "theme": "dark",
+  "projects": [
+    { "title":"Reactive E-commerce Backend", "description":"...", "image":"/ecommerce-diagram.png", "github":"https://github.com/..." },
+    { "title":"Auth Service", "description":"...", "image":"/auth-service.png", "github":"https://github.com/..." }
+  ],
+  "skills": [
+    { "title":"Skills Diagram", "body":"", "image":"/skills.png" }
+  ],
+  "experience": [
+    { "role":"Backend Developer Intern", "company":"Consulting Firm", "period":"2024", "description":"..." }
+  ],
+  "certifications": [
+    { "title":"AWS Certified Solutions Architect (2024)" }
+  ]
+}
