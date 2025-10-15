@@ -1,22 +1,25 @@
-import ContactMessage from '../models/ContactMessage.js'
-import { sendContactEmail } from '../services/mailer.js'
+import ContactMessage from "../models/ContactMessage.js";
+import { sendMail } from "../services/mailer.js";
 
-export async function postContact(req, res) {
+export const postContact = async (req, res) => {
   try {
-    const { name, email, phone, message } = req.body
-    if (!email || !message) return res.status(400).json({ error: 'email and message required' })
+    const { name, email, message } = req.body;
 
-    const saved = await ContactMessage.create({ name, email, phone, message })
-
-    try {
-      await sendContactEmail({ name, email, phone, message })
-    } catch (mailErr) {
-      console.warn('mailer error', mailErr)
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "All fields are required" });
     }
 
-    res.json({ ok: true, id: saved._id })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ error: 'internal' })
+    const newMessage = await ContactMessage.create({ name, email, message });
+
+    await sendMail({
+      to: process.env.CONTACT_EMAIL,
+      subject: `New message from ${name}`,
+      text: `You received a message from ${name} (${email}):\n\n${message}`,
+    });
+
+    res.status(201).json({ success: true, message: "Message sent successfully", data: newMessage });
+  } catch (error) {
+    console.error("Error saving message:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-}
+};
