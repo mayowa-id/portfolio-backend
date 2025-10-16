@@ -3,7 +3,7 @@ import app from '../src/app.js'
 import { connectToDatabase } from '../src/db/connect.js'
 import { sendContactEmail } from '../src/mailer.js'
 
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || https://mayowaportfolio.geraniol.xyz/
+const FRONTEND_ORIGIN = https://mayowaportfolio.geraniol.xyz/
 
 import cors from 'cors'
 app.use(cors({ 
