@@ -2,32 +2,36 @@ import serverless from 'serverless-http'
 import app from '../src/app.js'
 import { connectToDatabase } from '../src/db/connect.js'
 import { sendContactEmail } from '../src/mailer.js'
-
-const FRONTEND_ORIGIN = 'https://mayowaportfolio.geraniol.xyz/'
-
 import cors from 'cors'
+
+const FRONTEND_ORIGIN = 'https://mayowaportfolio.geraniol.xyz'
+
 app.use(cors({ 
   origin: (origin, cb) => {
-    if (!origin || origin === FRONTEND_ORIGIN) return cb(null, true)
-    return cb(null, true)
-  }
+    // Allow your domain, localhost, and no origin (same-site requests)
+    if (!origin || origin === FRONTEND_ORIGIN || origin.includes('localhost')) {
+      return cb(null, true)
+    }
+    return cb(null, true) // Temporarily allow all for testing
+  },
+  credentials: true
 }))
 
 app.post('/api/v1/contact', async (req, res) => {
   try {
-    const { name, email, message } = req.body
+    const { name, email, message, phone } = req.body
 
     if (!name || !email || !message) {
       return res.status(400).json({ error: 'All fields are required' })
     }
 
-    console.log('Contact form submission:', { name, email, message })
+    console.log('Contact form submission:', { name, email, phone, message })
 
     try {
       await sendContactEmail({ 
         name, 
         email, 
-        phone: '',
+        phone: phone || '',
         message 
       })
       console.log('Email sent successfully')
