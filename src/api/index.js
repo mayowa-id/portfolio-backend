@@ -1,64 +1,55 @@
-import serverless from 'serverless-http'
-import app from '../src/app.js'
-import { connectToDatabase } from '../src/db/connect.js'
-import { sendContactEmail } from '../src/mailer.js'
-import cors from 'cors'
+// api/index.js ()
+const serverless = require('serverless-http');
+const app = require('../src/app.js'); 
+const { connectToDatabase } = require('../src/db/connect.js');
+const { sendContactEmail } = require('../src/mailer.js');
+const cors = require('cors');
 
-const FRONTEND_ORIGIN = 'https://mayowaportfolio.geraniol.xyz'
+const FRONTEND_ORIGIN = 'https://mayowaportfolio.geraniol.xyz';
 
-app.use(cors({ 
+app.use(cors({
   origin: (origin, cb) => {
-    // Allow your domain, localhost, and no origin (same-site requests)
-    if (!origin || origin === FRONTEND_ORIGIN || origin.includes('localhost')) {
-      return cb(null, true)
+    if (!origin || origin === FRONTEND_ORIGIN || (origin && origin.includes('localhost'))) {
+      return cb(null, true);
     }
-    return cb(null, true) // Temporarily allow all for testing
+    return cb(null, true); 
   },
   credentials: true
-}))
+}));
 
 app.post('/api/v1/contact', async (req, res) => {
   try {
-    const { name, email, message, phone } = req.body
-
+    const { name, email, message, phone } = req.body;
     if (!name || !email || !message) {
-      return res.status(400).json({ error: 'All fields are required' })
+      return res.status(400).json({ error: 'All fields are required' });
     }
-
-    console.log('Contact form submission:', { name, email, phone, message })
-
+    console.log('Contact form submission:', { name, email, phone, message });
     try {
-      await sendContactEmail({ 
-        name, 
-        email, 
-        phone: phone || '',
-        message 
-      })
-      console.log('Email sent successfully')
+      await sendContactEmail({ name, email, phone: phone || '', message });
+      console.log('Email sent successfully');
     } catch (emailError) {
-      console.error('Email sending failed:', emailError)
+      console.error('Email sending failed:', emailError);
     }
-
-    res.status(200).json({ success: true, message: 'Message received' })
+    res.status(200).json({ success: true, message: 'Message received' });
   } catch (error) {
-    console.error('Contact form error:', error)
-    res.status(500).json({ error: 'Failed to process contact form' })
+    console.error('Contact form error:', error);
+    res.status(500).json({ error: 'Failed to process contact form' });
   }
-})
+});
 
-let connectPromise = null
+let connectPromise = null;
 async function ensureDb() {
-  if (!connectPromise) connectPromise = connectToDatabase()
-  return connectPromise
+  if (!connectPromise) connectPromise = connectToDatabase();
+  return connectPromise;
 }
 
-const handler = serverless(app)
+const handler = serverless(app);
 
-export default async function (req, res) {
+module.exports = async function (req, res) {
   try {
-    await ensureDb()
+    await ensureDb();
   } catch (err) {
-    console.error('DB connect error in serverless function:', err && err.message)
+    console.error('DB connect error in serverless function:', err && err.message);
   }
-  return handler(req, res)
-}
+  return handler(req, res);
+};
