@@ -1,16 +1,46 @@
 import serverless from 'serverless-http'
-import app from '../src/app.js'          // adjust path if your app is in a different place
+import app from '../src/app.js'
 import { connectToDatabase } from '../src/db/connect.js'
+import { sendContactEmail } from '../src/mailer.js'
 
-const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https://geranio.xyz'
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'https:/mayowaportfolio.geraniol.xyz'
 
 import cors from 'cors'
-app.use(cors({ origin: (origin, cb) => {
-  if (!origin || origin === FRONTEND_ORIGIN) return cb(null, true)
-  return cb(null, true)
-}}))
+app.use(cors({ 
+  origin: (origin, cb) => {
+    if (!origin || origin === FRONTEND_ORIGIN) return cb(null, true)
+    return cb(null, true)
+  }
+}))
 
-app.use((req, res, next) => next())
+app.post('/api/v1/contact', async (req, res) => {
+  try {
+    const { name, email, message } = req.body
+
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: 'All fields are required' })
+    }
+
+    console.log('Contact form submission:', { name, email, message })
+
+    try {
+      await sendContactEmail({ 
+        name, 
+        email, 
+        phone: '',
+        message 
+      })
+      console.log('Email sent successfully')
+    } catch (emailError) {
+      console.error('Email sending failed:', emailError)
+    }
+
+    res.status(200).json({ success: true, message: 'Message received' })
+  } catch (error) {
+    console.error('Contact form error:', error)
+    res.status(500).json({ error: 'Failed to process contact form' })
+  }
+})
 
 let connectPromise = null
 async function ensureDb() {
@@ -28,4 +58,3 @@ export default async function (req, res) {
   }
   return handler(req, res)
 }
-
