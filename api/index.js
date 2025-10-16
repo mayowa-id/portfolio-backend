@@ -1,15 +1,21 @@
+import express from 'express'
 import serverless from 'serverless-http'
-import app from '../src/app.js'
-
-const FRONTEND_ORIGIN = 'https://mayowaportfolio.geraniol.xyz'
-
 import cors from 'cors'
+
+const app = express()
+
 app.use(cors({
   origin: '*',
   credentials: true
 }))
 
-app.post('/api/v1/contact', async (req, res) => {
+app.use(express.json())
+
+app.get('/_health', (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() })
+})
+
+app.post('/api/v1/contact', (req, res) => {
   try {
     const { name, email, message, phone } = req.body
 
@@ -17,14 +23,17 @@ app.post('/api/v1/contact', async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' })
     }
 
-    console.log('Contact submission:', { name, email, message })
-    res.status(200).json({ success: true, message: 'Message received' })
+    console.log('Contact submission received:', { name, email, phone, message })
+    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Message received successfully' 
+    })
   } catch (error) {
-    console.error('Error:', error)
-    res.status(500).json({ error: 'Failed to process contact form' })
+    console.error('Contact error:', error)
+    res.status(500).json({ error: 'Failed to process' })
   }
 })
 
 const handler = serverless(app)
-
 export default handler
