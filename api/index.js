@@ -1,14 +1,18 @@
 import express from 'express'
+import serverless from 'serverless-http'
 import cors from 'cors'
 
 const app = express()
 
 app.use(cors({
   origin: '*',
-  credentials: true
 }))
 
 app.use(express.json())
+
+app.get('/', (req, res) => {
+  res.json({ message: 'Portfolio API is running' })
+})
 
 app.get('/_health', (req, res) => {
   res.json({ ok: true, time: new Date().toISOString() })
@@ -22,12 +26,16 @@ app.post('/api/v1/contact', (req, res) => {
       return res.status(400).json({ error: 'All fields are required' })
     }
 
-    console.log('Contact:', { name, email, phone, message })
-    res.json({ success: true, message: 'Received' })
+    console.log('Contact received:', { name, email, phone, message })
+    res.json({ success: true, message: 'Message received' })
   } catch (error) {
     console.error('Error:', error)
-    res.status(500).json({ error: 'Failed' })
+    res.status(500).json({ error: 'Failed to process' })
   }
 })
 
-export default app
+app.use((req, res) => {
+  res.status(404).json({ error: 'Not found' })
+})
+
+export default serverless(app)
