@@ -1,5 +1,4 @@
 import express from 'express'
-import serverless from 'serverless-http'
 import cors from 'cors'
 
 const app = express()
@@ -23,17 +22,12 @@ app.post('/api/v1/contact', (req, res) => {
       return res.status(400).json({ error: 'All fields are required' })
     }
 
-    console.log('Contact submission received:', { name, email, phone, message })
-    
-    res.status(200).json({ 
-      success: true, 
-      message: 'Message received successfully' 
-    })
+    console.log('Contact:', { name, email, phone, message })
+    res.json({ success: true, message: 'Received' })
   } catch (error) {
-    console.error('Contact error:', error)
-    res.status(500).json({ error: 'Failed to process' })
+    console.error('Error:', error)
+    res.status(500).json({ error: 'Failed' })
   }
 })
 
-const handler = serverless(app)
-export default handler
+export default app
