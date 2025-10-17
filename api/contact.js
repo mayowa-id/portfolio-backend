@@ -1,4 +1,16 @@
-export default function handler(req, res) {
+import nodemailer from 'nodemailer'
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+})
+
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT')
@@ -19,6 +31,18 @@ export default function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields' })
   }
 
-  console.log('Contact received:', { name, email, phone, message })
-  res.status(200).json({ success: true, message: 'Message received' })
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: process.env.TO_EMAIL,
+      subject: `Portfolio contact from ${name}`,
+      text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'N/A'}\n\nMessage:\n${message}`
+    })
+
+    console.log('Email sent successfully')
+    res.status(200).json({ success: true, message: 'Message received and email sent' })
+  } catch (error) {
+    console.error('Email error:', error)
+    res.status(200).json({ success: true, message: 'Message received' })
+  }
 }
